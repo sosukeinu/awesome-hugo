@@ -17,14 +17,31 @@ refactor_pages_to_page_bundles()
   # Iterate over pages except index.md and _index.md.
   local files="$(find ./content/ -iname '*.md' -not -iname '*index.md')"
   for file in ${files}; do
+    MATCH=()
     local pagedir="${file%.md}"
 
     echo "${file} -> ${pagedir}/index.md"
     if [ ! -d "${pagedir}" ]; then
-      mkdir "${pagedir}"
+      # mkdir "${pagedir}"
+      mkdir -p "${pagedir}/images"
     fi
-
+    
+    MATCH+=($(sed -nE 's/(feature:|\!\[.*\]\()\s*(.+?.*.[webp|gif|jpe?g|svg|png]).*$/\2/gp' "${file}"))
+    CLEANMATCH=(); while IFS= read -r -d '' x; do CLEANMATCH+=("$x"); done < <(printf "%s\0" "${MATCH[@]}" | sort -uz)
+    # echo "checking page: ${file} for images"
+    # echo "current match: ${MATCH[*]}"
+    # echo "current match count: ${#MATCH[@]}"
+    # echo "clean match: ${CLEANMATCH[*]}"
+    # echo "clean match count: ${#CLEANMATCH[@]}"
+    
+    for IMG in ${CLEANMATCH[*]}; do
+      [ -f "$(dirname $file)/${IMG}" ] && cp "$(dirname $file)/${IMG}" "${pagedir}/images/${IMG}"
+    done
+    # TODO: Uncomment this line to actually move files
+    echo "mv \"${file}\" \"${pagedir}/index.md\""
     mv "${file}" "${pagedir}/index.md"
+    sed -iE 's/feature:\s*\(.*\)/feature: images\/\1/g' "${pagedir}/index.md"
+    # sed -iE 's/\!\[(.*)\]((.*))/![\1](images\/\2)/' "${pagedir}/index.md"
   done
 }
 
