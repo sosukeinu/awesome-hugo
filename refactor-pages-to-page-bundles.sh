@@ -37,10 +37,12 @@ refactor_pages_to_page_bundles()
     for IMG in ${CLEANMATCH[*]}; do
       [ -f "$(dirname $file)/${IMG}" ] && cp "$(dirname $file)/${IMG}" "${pagedir}/images/${IMG}"
     done
-    # TODO: Uncomment this line to actually move files
     echo "mv \"${file}\" \"${pagedir}/index.md\""
-    mv "${file}" "${pagedir}/index.md"
-    sed -iE 's/feature:\s*\(.*\)/feature: images\/\1/g' "${pagedir}/index.md"
+    # TODO: Uncomment this line to actually move files
+    # mv "${file}" "${pagedir}/index.md"
+    cp "${file}" "${pagedir}/index.md"
+    sed -iE 's/(feature:|\!\[.*\]\()\s*(.+?.*.[webp|gif|jpe?g|svg|png]).*$/images\/\2/gp'
+    # sed -iE 's/feature:\s*\(.*\)/feature: images\/\1/g' "${pagedir}/index.md"
     # sed -iE 's/\!\[(.*)\]((.*))/![\1](images\/\2)/' "${pagedir}/index.md"
   done
 }
