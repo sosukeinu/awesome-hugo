@@ -28,22 +28,18 @@ refactor_pages_to_page_bundles()
     
     MATCH+=($(sed -nE 's/(feature:|\!\[.*\]\()\s*(.+?.*.[webp|gif|jpe?g|svg|png]).*$/\2/gp' "${file}"))
     CLEANMATCH=(); while IFS= read -r -d '' x; do CLEANMATCH+=("$x"); done < <(printf "%s\0" "${MATCH[@]}" | sort -uz)
-    # echo "checking page: ${file} for images"
-    # echo "current match: ${MATCH[*]}"
-    # echo "current match count: ${#MATCH[@]}"
-    # echo "clean match: ${CLEANMATCH[*]}"
-    # echo "clean match count: ${#CLEANMATCH[@]}"
+    echo "checking page: ${file} for images"
+    echo "current match: ${MATCH[*]}"
+    echo "current match count: ${#MATCH[@]}"
+    echo "clean match: ${CLEANMATCH[*]}"
+    echo "clean match count: ${#CLEANMATCH[@]}"
     
-    for IMG in ${CLEANMATCH[*]}; do
-      [ -f "$(dirname $file)/${IMG}" ] && cp "$(dirname $file)/${IMG}" "${pagedir}/images/${IMG}"
+    for IMG in "${CLEANMATCH[@]}"; do
+      [ -f "$(dirname $file)/${IMG}" ] && echo "cp $(dirname $file)/$IMG to $pagedir/images/$IMG" && cp "$(dirname $file)/${IMG}" "${pagedir}/images/${IMG}"
     done
     echo "mv \"${file}\" \"${pagedir}/index.md\""
     # TODO: Uncomment this line to actually move files
-    # mv "${file}" "${pagedir}/index.md"
-    cp "${file}" "${pagedir}/index.md"
-    sed -iE 's/(feature:|\!\[.*\]\()\s*(.+?.*.[webp|gif|jpe?g|svg|png]).*$/images\/\2/gp'
-    # sed -iE 's/feature:\s*\(.*\)/feature: images\/\1/g' "${pagedir}/index.md"
-    # sed -iE 's/\!\[(.*)\]((.*))/![\1](images\/\2)/' "${pagedir}/index.md"
+    mv "${file}" "${pagedir}/index.md"
   done
 }
 
